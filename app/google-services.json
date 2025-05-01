@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "229117392671",
+    "project_id": "mydiary-ras",
+    "storage_bucket": "mydiary-ras.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:229117392671:android:8db8d3537839ab8d6da22a",
+        "android_client_info": {
+          "package_name": "com.ras.mydiary"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDJMHMClWhuBTyamln6nIsH0sp8__gxjqo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
