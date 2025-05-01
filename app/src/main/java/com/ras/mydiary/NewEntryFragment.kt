@@ -1,4 +1,3 @@
-// NewEntryFragment.kt
 package com.ras.mydiary
 
 import android.os.Bundle

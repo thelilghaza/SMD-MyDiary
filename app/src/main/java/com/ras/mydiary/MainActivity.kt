@@ -1,9 +1,10 @@
 package com.ras.mydiary
 
+import android.content.Intent
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Base64
-import android.view.Menu
+import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.findNavController
@@ -11,11 +12,13 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
-import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.navigation.NavigationView
 import com.ras.mydiary.databinding.ActivityMainBinding
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.widget.Toolbar
+import androidx.core.view.GravityCompat
 import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
@@ -31,7 +34,9 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        setSupportActionBar(binding.appBarMain.toolbar)
+        val toolbar = findViewById<Toolbar>(R.id.toolbar)
+        setSupportActionBar(toolbar)
+        supportActionBar?.setDisplayShowTitleEnabled(false)
 
         binding.appBarMain.fab.setOnClickListener {
             val navController = findNavController(R.id.nav_host_fragment_content_main)
@@ -45,14 +50,59 @@ class MainActivity : AppCompatActivity() {
         val navController = navHostFragment.navController
 
         appBarConfiguration = AppBarConfiguration(
-            setOf(
-                R.id.nav_home, R.id.nav_new_entry, R.id.nav_settings,
-            ), drawerLayout
+            setOf(R.id.nav_home, R.id.nav_new_entry, R.id.nav_settings)
         )
 
         setupActionBarWithNavController(navController, appBarConfiguration)
 
-        navView.setupWithNavController(navController)
+        val menuButton = findViewById<ImageButton>(R.id.hamburger_icon)
+        menuButton.setOnClickListener {
+            if (!drawerLayout.isDrawerOpen(GravityCompat.END)) {
+                drawerLayout.openDrawer(GravityCompat.END)
+            } else {
+                drawerLayout.closeDrawer(GravityCompat.END)
+            }
+        }
+
+        navView.setNavigationItemSelectedListener { menuItem ->
+            val handled = when (menuItem.itemId) {
+                R.id.nav_home -> {
+                    navController.navigate(R.id.nav_home)
+                    true
+                }
+                R.id.nav_new_entry -> {
+                    navController.navigate(R.id.nav_new_entry)
+                    true
+                }
+                R.id.nav_settings -> {
+                    navController.navigate(R.id.nav_settings)
+                    true
+                }
+                R.id.nav_logout -> {
+                    FirebaseAuth.getInstance().signOut() // Sign out from Firebase
+                    Toast.makeText(this, "Logged out successfully", Toast.LENGTH_SHORT).show()
+                    val intent = Intent(this, LoginActivity::class.java)
+                    startActivity(intent)
+                    finish()
+                    true
+                }
+                else -> false
+            }
+
+            if (handled) {
+                drawerLayout.closeDrawer(GravityCompat.END)
+            }
+
+            handled
+        }
+
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            if (destination.id == R.id.nav_new_entry || destination.id == R.id.nav_settings) {
+                binding.appBarMain.fab.hide()
+            } else {
+                binding.appBarMain.fab.show()
+            }
+        }
 
         val headerView = navView.getHeaderView(0)
         val imageView = headerView.findViewById<ImageView>(R.id.imageView_profile)
@@ -99,11 +149,6 @@ class MainActivity : AppCompatActivity() {
                 // Handle failure
             }
         }
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.main, menu)
-        return true
     }
 
     override fun onSupportNavigateUp(): Boolean {

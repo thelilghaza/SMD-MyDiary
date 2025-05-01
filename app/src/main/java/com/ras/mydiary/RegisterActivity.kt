@@ -93,7 +93,7 @@ class RegisterActivity : AppCompatActivity() {
 
                                         when (roleValue) {
                                             "user" -> startActivity(Intent(this, MainActivity::class.java))
-                                            "therapist" -> startActivity(Intent(this, MainActivity::class.java))
+                                            "therapist" -> startActivity(Intent(this, MainActivity2::class.java))
                                             else -> Toast.makeText(this, "Unknown role", Toast.LENGTH_SHORT).show()
                                         }
 

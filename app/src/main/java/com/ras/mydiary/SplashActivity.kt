@@ -15,26 +15,37 @@ class SplashActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
 
-        // Find the LottieAnimationView
         val animationView = findViewById<LottieAnimationView>(R.id.splashAnimation)
-        animationView.setAnimation(R.raw.splash_animation) // Load JSON animation
-        animationView.playAnimation() // Start Animation
+        animationView.setAnimation(R.raw.splash_animation)
+        animationView.playAnimation()
 
-        // Delay and check authentication before proceeding
         Handler(Looper.getMainLooper()).postDelayed({
             checkUserAuthentication()
-        }, 1000) // 1-second delay
+        }, 1000)
     }
 
     private fun checkUserAuthentication() {
         val currentUser = FirebaseAuth.getInstance().currentUser
         if (currentUser != null) {
-            // User is logged in, navigate to FeedActivity
-            startActivity(Intent(this, MainActivity::class.java))
+            val database = com.google.firebase.database.FirebaseDatabase.getInstance().getReference("Users")
+            database.child(currentUser.uid).child("role").get()
+                .addOnSuccessListener { roleSnapshot ->
+                    val role = roleSnapshot.getValue(String::class.java)
+                    val intent = when (role) {
+                        "user" -> Intent(this, MainActivity::class.java)
+                        "therapist" -> Intent(this, MainActivity2::class.java)
+                        else -> Intent(this, LoginActivity::class.java)
+                    }
+                    startActivity(intent)
+                    finish()
+                }
+                .addOnFailureListener {
+                    startActivity(Intent(this, LoginActivity::class.java))
+                    finish()
+                }
         } else {
-            // User not logged in, navigate to LoginActivity
             startActivity(Intent(this, LoginActivity::class.java))
+            finish()
         }
-        finish() // Close SplashActivity
     }
 }

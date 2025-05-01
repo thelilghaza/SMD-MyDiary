@@ -74,9 +74,31 @@ class LoginActivity : AppCompatActivity() {
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    Toast.makeText(this, "Login Successful!", Toast.LENGTH_SHORT).show()
-                    startActivity(Intent(this, MainActivity::class.java))
-                    finish()
+                    // User is logged in successfully, now fetch role
+                    val userId = auth.currentUser?.uid ?: return@addOnCompleteListener
+
+                    // Fetch role from the database
+                    database.child(userId).child("role").get()
+                        .addOnSuccessListener { roleSnapshot ->
+                            val roleValue = roleSnapshot.getValue(String::class.java)
+
+                            // Navigate based on the role
+                            when (roleValue) {
+                                "user" -> {
+                                    startActivity(Intent(this, MainActivity::class.java))
+                                }
+                                "therapist" -> {
+                                    startActivity(Intent(this, MainActivity2::class.java))
+                                }
+                                else -> {
+                                    Toast.makeText(this, "Unknown role", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                            finish()
+                        }
+                        .addOnFailureListener {
+                            Toast.makeText(this, "Failed to retrieve role", Toast.LENGTH_SHORT).show()
+                        }
                 } else {
                     Toast.makeText(this, "Invalid Credentials", Toast.LENGTH_SHORT).show()
                 }

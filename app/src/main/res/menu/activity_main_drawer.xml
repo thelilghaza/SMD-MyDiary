@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:showIn="navigation_view">
 
@@ -12,10 +13,15 @@
             android:id="@+id/nav_new_entry"
             android:icon="@drawable/icon_post_foreground"
             android:title="@string/new_entry" />
-
         <item
             android:id="@+id/nav_settings"
             android:icon="@drawable/settings"
             android:title="@string/settings" />
     </group>
+
+    <item
+        android:id="@+id/nav_logout"
+        android:icon="@drawable/sign_out"
+        android:title="@string/sign_out"
+        app:showAsAction="never" />
 </menu>
