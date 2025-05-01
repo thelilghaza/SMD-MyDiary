@@ -54,6 +54,8 @@
     <string name="user">User</string>
     <string name="therapist">Therapist</string>
     <string name="admin">Admin</string>
+    <string name="new_entry">New Journal Entry</string>
+    <string name="settings">Settings</string>
 
     <string-array name="user_roles">
         <item>User</item>

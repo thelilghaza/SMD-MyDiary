@@ -49,7 +49,6 @@ class RegisterActivity : AppCompatActivity() {
             val password = passwordField.text.toString().trim()
             val name = nameField.text.toString().trim()
 
-            // Get the selected role
             val selectedRoleId = roleRadioGroup.checkedRadioButtonId
             val role = when (selectedRoleId) {
                 R.id.roleUserRadio -> "user"
@@ -82,7 +81,8 @@ class RegisterActivity : AppCompatActivity() {
                             email = email,
                             phone = phone,
                             role = role,
-                            oneSignalId = oneSignalId
+                            oneSignalId = oneSignalId,
+                            profileImageUrl = ""
                         )
 
                         database.child(userId).setValue(appUser)

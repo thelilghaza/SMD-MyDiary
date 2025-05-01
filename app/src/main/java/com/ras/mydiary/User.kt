@@ -5,5 +5,6 @@ data class User(
     val email: String = "",
     val phone: String = "",
     val role: String = "", // "user", "therapist", "admin"
-    val oneSignalId: String = ""
+    val oneSignalId: String = "",
+    val profileImageUrl: String = ""
 )

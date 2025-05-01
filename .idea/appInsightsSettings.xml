@@ -9,9 +9,9 @@
               <option name="connection">
                 <ConnectionSetting>
                   <option name="appId" value="com.ras.mydiary" />
-                  <option name="mobileSdkAppId" value="1:182009707267:android:cf56d3f70a75a1480f0736" />
-                  <option name="projectId" value="smd-mydiary" />
-                  <option name="projectNumber" value="182009707267" />
+                  <option name="mobileSdkAppId" value="1:229117392671:android:8db8d3537839ab8d6da22a" />
+                  <option name="projectId" value="mydiary-ras" />
+                  <option name="projectNumber" value="229117392671" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
