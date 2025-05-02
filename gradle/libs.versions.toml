@@ -25,6 +25,7 @@ firebaseDatabase = "21.0.0"
 recyclerview = "1.4.0"
 firebaseFirestore = "25.1.4"
 uiTextAndroid = "1.8.0"
+swiperefreshlayout = "1.1.0"
 
 [libraries]
 androidx-recyclerview = { module = "androidx.recyclerview:recyclerview", version.ref = "recyclerview" }
@@ -50,6 +51,7 @@ androidx-activity = { group = "androidx.activity", name = "activity", version.re
 firebase-database = { group = "com.google.firebase", name = "firebase-database", version.ref = "firebaseDatabase" }
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore", version.ref = "firebaseFirestore" }
 androidx-ui-text-android = { group = "androidx.compose.ui", name = "ui-text-android", version.ref = "uiTextAndroid" }
+androidx-swiperefreshlayout = { group = "androidx.swiperefreshlayout", name = "swiperefreshlayout", version.ref = "swiperefreshlayout" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

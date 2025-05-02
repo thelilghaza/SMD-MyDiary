@@ -22,4 +22,15 @@
         android:name="com.ras.mydiary.SettingsFragment"
         android:label="Settings"
         tools:layout="@layout/fragment_settings" />
+
+    <fragment
+        android:id="@+id/nav_view_journal"
+        android:name="com.ras.mydiary.ViewJournalFragment"
+        android:label="Journal Details"
+        tools:layout="@layout/fragment_view_journal">
+        <argument
+            android:name="journal_id"
+            app:argType="string"
+            app:nullable="false" />
+    </fragment>
 </navigation>
