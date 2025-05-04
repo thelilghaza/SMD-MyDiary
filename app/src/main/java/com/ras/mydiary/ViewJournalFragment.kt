@@ -26,9 +26,12 @@ class ViewJournalFragment : Fragment() {
     private var journalListener: ValueEventListener? = null
 
     private lateinit var usernameTextView: TextView
+    private lateinit var titleTextView: TextView
+    private lateinit var titleEditText: EditText
     private lateinit var contentEditText: EditText
     private lateinit var contentTextView: TextView
     private lateinit var moodTextView: TextView
+    private lateinit var moodEditText: EditText
     private lateinit var timestampTextView: TextView
     private lateinit var likeButton: ImageButton
     private lateinit var likeCountTextView: TextView
@@ -60,9 +63,12 @@ class ViewJournalFragment : Fragment() {
 
         // Initialize views
         usernameTextView = view.findViewById(R.id.detail_username)
+        titleTextView = view.findViewById(R.id.detail_title)
+        titleEditText = view.findViewById(R.id.detail_title_edit)
         contentEditText = view.findViewById(R.id.detail_content_edit)
         contentTextView = view.findViewById(R.id.detail_content)
         moodTextView = view.findViewById(R.id.detail_mood)
+        moodEditText = view.findViewById(R.id.detail_mood_edit)
         timestampTextView = view.findViewById(R.id.detail_timestamp)
         likeButton = view.findViewById(R.id.like_button)
         likeCountTextView = view.findViewById(R.id.like_count)
@@ -125,9 +131,12 @@ class ViewJournalFragment : Fragment() {
 
                     // Display journal details
                     usernameTextView.text = it.userName
+                    titleTextView.text = it.title
+                    titleEditText.setText(it.title)
                     contentTextView.text = it.content
                     contentEditText.setText(it.content)
                     moodTextView.text = it.mood
+                    moodEditText.setText(it.mood)
 
                     // Format and display timestamp
                     val dateFormat = SimpleDateFormat("dd MMM yyyy, hh:mm a", Locale.getDefault())
@@ -148,7 +157,7 @@ class ViewJournalFragment : Fragment() {
                     }
 
                     // Update like count
-                    val likeCount = it.likes.size
+                    val likeCount = it.likes.count { entry -> entry.value }
                     likeCountTextView.text = likeCount.toString()
 
                     // Initial UI setup
@@ -219,8 +228,12 @@ class ViewJournalFragment : Fragment() {
     private fun toggleEditMode(editing: Boolean) {
         isEditing = editing
 
+        titleTextView.visibility = if (editing) View.GONE else View.VISIBLE
+        titleEditText.visibility = if (editing) View.VISIBLE else View.GONE
         contentTextView.visibility = if (editing) View.GONE else View.VISIBLE
         contentEditText.visibility = if (editing) View.VISIBLE else View.GONE
+        moodTextView.visibility = if (editing) View.GONE else View.VISIBLE
+        moodEditText.visibility = if (editing) View.VISIBLE else View.GONE
 
         editButton.visibility = if (editing) View.GONE else (if (isOwner) View.VISIBLE else View.GONE)
         saveButton.visibility = if (editing) View.VISIBLE else View.GONE
@@ -228,10 +241,22 @@ class ViewJournalFragment : Fragment() {
     }
 
     private fun saveJournalChanges() {
+        val updatedTitle = titleEditText.text.toString().trim()
         val updatedContent = contentEditText.text.toString().trim()
+        val updatedMood = moodEditText.text.toString().trim()
+
+        if (updatedTitle.isEmpty()) {
+            titleEditText.error = "Title cannot be empty"
+            return
+        }
 
         if (updatedContent.isEmpty()) {
-            Toast.makeText(context, "Content cannot be empty", Toast.LENGTH_SHORT).show()
+            contentEditText.error = "Content cannot be empty"
+            return
+        }
+
+        if (updatedMood.isEmpty()) {
+            moodEditText.error = "Mood cannot be empty"
             return
         }
 
@@ -239,13 +264,21 @@ class ViewJournalFragment : Fragment() {
         saveButton.isEnabled = false
         saveButton.text = "Saving..."
 
-        // Update content in Firebase
-        database.child(journalId).child("content").setValue(updatedContent)
+        // Update journal in Firebase
+        val updates = HashMap<String, Any>()
+        updates["title"] = updatedTitle
+        updates["content"] = updatedContent
+        updates["mood"] = updatedMood
+
+        database.child(journalId).updateChildren(updates)
             .addOnSuccessListener {
                 Toast.makeText(context, "Journal updated successfully", Toast.LENGTH_SHORT).show()
 
                 // Update UI immediately for better UX
+                titleTextView.text = updatedTitle
                 contentTextView.text = updatedContent
+                moodTextView.text = updatedMood
+
                 toggleEditMode(false)
 
                 // Restore button state

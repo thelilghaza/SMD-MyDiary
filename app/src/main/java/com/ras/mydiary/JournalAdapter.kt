@@ -20,6 +20,7 @@ class JournalAdapter(private val journalList: List<JournalEntry>) :
     class JournalViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val profileImageView: ImageView = itemView.findViewById(R.id.profileImageView)
         val userName: TextView = itemView.findViewById(R.id.usernameTextView)
+        val titleTextView: TextView = itemView.findViewById(R.id.titleTextView)
         val content: TextView = itemView.findViewById(R.id.contentTextView)
         val mood: TextView = itemView.findViewById(R.id.moodTextView)
         val timestamp: TextView = itemView.findViewById(R.id.timestampTextView)
@@ -41,6 +42,9 @@ class JournalAdapter(private val journalList: List<JournalEntry>) :
 
         // Set username
         holder.userName.text = journal.userName
+
+        // Set title - this was missing
+        holder.titleTextView.text = journal.title
 
         // Set content (limit to 3 lines, ellipsize if longer)
         holder.content.text = journal.content

@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Switch
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -46,12 +45,18 @@ class NewEntryFragment : Fragment() {
 
     private fun saveJournalEntry() {
         val title = binding.entryTitle.text.toString().trim()
+        val mood = binding.entryMood.text.toString().trim()
         val content = binding.entryContent.text.toString().trim()
         val isPublic = binding.privacySwitch.isChecked
 
         // Basic validation
         if (title.isEmpty()) {
             binding.entryTitle.error = "Title is required"
+            return
+        }
+
+        if (mood.isEmpty()) {
+            binding.entryMood.error = "Mood is required"
             return
         }
 
@@ -91,8 +96,9 @@ class NewEntryFragment : Fragment() {
                 id = entryId,
                 userId = userId,
                 userName = userName,
+                title = title,
                 content = content,
-                mood = title, // Using title as mood since your UI has title instead of mood selector
+                mood = mood,
                 timestamp = System.currentTimeMillis(),
                 likes = mapOf(), // Initialize with empty likes map
                 isPublic = isPublic // Set the privacy setting

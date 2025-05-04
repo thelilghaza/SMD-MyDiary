@@ -5,7 +5,7 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <!-- Privacy Switch Section - Made Much Larger -->
+    <!-- Privacy Switch Section -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -48,6 +48,26 @@
     <EditText
         android:id="@+id/entryTitle"
         android:hint="Enter title here..."
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="56dp"
+        android:padding="12dp"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/edit_text_bg" />
+
+    <!-- Mood Field -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Mood"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_marginStart="10dp"
+        android:layout_marginBottom="8dp" />
+
+    <EditText
+        android:id="@+id/entryMood"
+        android:hint="How are you feeling?"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:minHeight="56dp"
