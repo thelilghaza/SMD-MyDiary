@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -13,6 +15,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.ras.mydiary.databinding.FragmentNewEntryBinding
+import java.util.Locale
 
 class NewEntryFragment : Fragment() {
     private var _binding: FragmentNewEntryBinding? = null
@@ -23,8 +26,15 @@ class NewEntryFragment : Fragment() {
     private val journalsRef = database.getReference("Journals")
     private val usersRef = database.getReference("Users")
 
+    // List of predefined moods
+    private val moodList = listOf(
+        "angry", "sad", "happy", "neutral",
+        "irritated", "excited", "nervous", "tired", "confused"
+    )
+
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentNewEntryBinding.inflate(inflater, container, false)
@@ -37,15 +47,28 @@ class NewEntryFragment : Fragment() {
         // Initialize Firebase Auth
         auth = FirebaseAuth.getInstance()
 
+        // Setup mood dropdown
+        setupMoodDropdown()
+
         // Set up save button click listener
         binding.saveEntryButton.setOnClickListener {
             saveJournalEntry()
         }
     }
 
+    private fun setupMoodDropdown() {
+        val adapter = ArrayAdapter(
+            requireContext(),
+            android.R.layout.simple_dropdown_item_1line,
+            moodList.map { it.capitalize(Locale.ROOT) }
+        )
+
+        (binding.entryMood as? AutoCompleteTextView)?.setAdapter(adapter)
+    }
+
     private fun saveJournalEntry() {
         val title = binding.entryTitle.text.toString().trim()
-        val mood = binding.entryMood.text.toString().trim()
+        val mood = binding.entryMood.text.toString().trim().lowercase(Locale.getDefault())
         val content = binding.entryContent.text.toString().trim()
         val isPublic = binding.privacySwitch.isChecked
 
@@ -57,6 +80,11 @@ class NewEntryFragment : Fragment() {
 
         if (mood.isEmpty()) {
             binding.entryMood.error = "Mood is required"
+            return
+        }
+
+        if (mood !in moodList) {
+            binding.entryMood.error = "Please select a valid mood"
             return
         }
 
@@ -76,7 +104,7 @@ class NewEntryFragment : Fragment() {
         binding.saveEntryButton.isEnabled = false
         binding.saveEntryButton.text = "Saving..."
 
-        // Get the user's data from Firebase database instead of Auth
+        // Get the user's data from Firebase database
         getUsernameFromDatabase(currentUser.uid) { userName ->
             // Generate a unique key for this entry
             val entryId = journalsRef.push().key
@@ -91,7 +119,7 @@ class NewEntryFragment : Fragment() {
             // Get user data
             val userId = currentUser.uid
 
-            // Create journal entry object with all fields from the model class
+            // Create journal entry object
             val journalEntry = JournalEntry(
                 id = entryId,
                 userId = userId,
@@ -101,7 +129,7 @@ class NewEntryFragment : Fragment() {
                 mood = mood,
                 timestamp = System.currentTimeMillis(),
                 likes = mapOf(), // Initialize with empty likes map
-                isPublic = isPublic // Set the privacy setting
+                isPublic = isPublic
             )
 
             // Save to Firebase Realtime Database

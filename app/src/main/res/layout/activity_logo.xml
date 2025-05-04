@@ -27,7 +27,7 @@
         android:fontFamily="casual"
         android:gravity="center"
         android:layout_marginTop="20dp"
-        android:text="Be Kind To Your Mind,\nMental Health Matters"
+        android:text="Be Kind To Your Mind\nMental Health Matters"
         android:textAlignment="center"
         android:textColor="#5B7CB1"
         android:textSize="25sp"

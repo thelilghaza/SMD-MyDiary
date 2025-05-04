@@ -24,6 +24,11 @@
         tools:layout="@layout/fragment_settings" />
 
     <fragment
+        android:id="@+id/nav_mood_analysis"
+        android:name="com.ras.mydiary.MoodAnalysisFragment"
+        android:label="Mood Analysis" />
+
+    <fragment
         android:id="@+id/nav_view_journal"
         android:name="com.ras.mydiary.ViewJournalFragment"
         android:label="Journal Details"

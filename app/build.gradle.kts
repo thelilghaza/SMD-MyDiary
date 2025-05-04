@@ -45,7 +45,7 @@ dependencies {
     implementation(libs.lottie)
     implementation(libs.androidx.recyclerview)
     implementation(libs.glide)
-
+    implementation(libs.philjay.mpandroidchart)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)

@@ -1,6 +1,7 @@
 [versions]
 fullSdk = "4.5.2"
 glide = "4.16.0"
+mpandroidchartVersion = "v3.1.0"
 onesignal = "5.1.31"
 lottie = "6.6.6"
 agp = "8.9.2"
@@ -52,6 +53,7 @@ firebase-database = { group = "com.google.firebase", name = "firebase-database",
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore", version.ref = "firebaseFirestore" }
 androidx-ui-text-android = { group = "androidx.compose.ui", name = "ui-text-android", version.ref = "uiTextAndroid" }
 androidx-swiperefreshlayout = { group = "androidx.swiperefreshlayout", name = "swiperefreshlayout", version.ref = "swiperefreshlayout" }
+philjay-mpandroidchart = { module = "com.github.PhilJay:MPAndroidChart", version.ref = "mpandroidchartVersion" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

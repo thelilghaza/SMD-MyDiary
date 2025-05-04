@@ -8,9 +8,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
-import android.widget.EditText
-import android.widget.ImageButton
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.tabs.TabLayout
@@ -81,6 +78,10 @@ class HomeFragment : Fragment() {
             android.R.color.holo_red_light
         )
 
+        // Initialize the adapter with an empty list first
+        journalAdapter = JournalAdapter(emptyList())
+        binding.journalRecyclerView.adapter = journalAdapter
+
         // Load dummy data initially (for quick UI rendering)
         loadDummyData()
 
@@ -129,16 +130,16 @@ class HomeFragment : Fragment() {
                     0 -> {
                         currentFilterMode = FilterMode.ALL_ENTRIES
                         applyFiltersAndSearch()
+                        showJournalList()
                     }
                     1 -> {
                         currentFilterMode = FilterMode.MY_ENTRIES
                         applyFiltersAndSearch()
+                        showJournalList()
                     }
                     2 -> {
                         currentFilterMode = FilterMode.MOOD_ANALYSIS
-                        // TODO: Implement mood analysis view
-                        // For now, just filter by entries with a mood
-                        applyFiltersAndSearch()
+                        openMoodAnalysisFragment()
                     }
                 }
             }
@@ -147,6 +148,40 @@ class HomeFragment : Fragment() {
 
             override fun onTabReselected(tab: TabLayout.Tab?) {}
         })
+    }
+
+    private fun showJournalList() {
+        // Show the journal list and hide any other views
+        binding.journalContentContainer.visibility = View.VISIBLE
+    }
+
+    private fun openMoodAnalysisFragment() {
+        try {
+            // Create the MoodAnalysisFragment
+            val moodAnalysisFragment = MoodAnalysisFragment()
+
+            // Get the parent activity's fragment manager
+            val fragmentManager = requireActivity().supportFragmentManager
+
+            // Begin the transaction
+            val transaction = fragmentManager.beginTransaction()
+
+            // Replace the fragmentContainer with the new fragment
+            transaction.replace(R.id.fragmentContainer, moodAnalysisFragment)
+
+            // Add to back stack so the user can navigate back
+            transaction.addToBackStack("Mood Analysis")
+
+            // Commit the transaction
+            transaction.commit()
+
+            // Hide the journal content container
+            binding.journalContentContainer.visibility = View.GONE
+        } catch (e: Exception) {
+            // Log the error - in a real app you'd use proper logging
+            println("Error navigating to MoodAnalysisFragment: ${e.message}")
+            e.printStackTrace()
+        }
     }
 
     private fun loadDummyData() {
@@ -255,8 +290,8 @@ class HomeFragment : Fragment() {
                 filteredList = filteredList.filter { it.userId == currentUserId }.toMutableList()
             }
             FilterMode.MOOD_ANALYSIS -> {
-                // For now, just show all entries (will be replaced with actual mood analysis)
-                // This is just a placeholder for future mood analysis functionality
+                // For mood analysis tab, we now navigate to MoodAnalysisFragment
+                // But we'll keep the filtering logic for backward compatibility
             }
         }
 
