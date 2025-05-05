@@ -60,7 +60,7 @@ class NewEntryFragment : Fragment() {
         val adapter = ArrayAdapter(
             requireContext(),
             android.R.layout.simple_dropdown_item_1line,
-            moodList.map { it.capitalize(Locale.ROOT) }
+            moodList.map { it.replaceFirstChar { char -> char.uppercase(Locale.ROOT) } }
         )
 
         (binding.entryMood as? AutoCompleteTextView)?.setAdapter(adapter)
@@ -129,7 +129,7 @@ class NewEntryFragment : Fragment() {
                 mood = mood,
                 timestamp = System.currentTimeMillis(),
                 likes = mapOf(), // Initialize with empty likes map
-                isPublic = isPublic
+                public = isPublic
             )
 
             // Save to Firebase Realtime Database

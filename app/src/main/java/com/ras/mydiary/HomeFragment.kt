@@ -8,12 +8,17 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
+import androidx.annotation.OptIn
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.tabs.TabLayout
 import com.ras.mydiary.databinding.FragmentHomeBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import androidx.media3.common.util.Log
+import androidx.media3.common.util.UnstableApi
+import androidx.navigation.fragment.findNavController
 
 class HomeFragment : Fragment() {
 
@@ -24,16 +29,10 @@ class HomeFragment : Fragment() {
     private lateinit var database: DatabaseReference
     private lateinit var auth: FirebaseAuth
 
-    // Keep a list of all journal entries to filter for search
     private val allJournalEntries = mutableListOf<JournalEntry>()
-
-    // Current filter mode
     private var currentFilterMode = FilterMode.ALL_ENTRIES
-
-    // Search query
     private var currentSearchQuery = ""
 
-    // Enum for filter modes
     private enum class FilterMode {
         ALL_ENTRIES,
         MY_ENTRIES,
@@ -52,25 +51,20 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Initialize Firebase
-        database = FirebaseDatabase.getInstance().getReference("Journals")
         auth = FirebaseAuth.getInstance()
+        database = FirebaseDatabase.getInstance().getReference("Journals")
 
-        // Initialize RecyclerView
         binding.journalRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+        journalAdapter = JournalAdapter(emptyList())
+        binding.journalRecyclerView.adapter = journalAdapter
 
-        // Set up search functionality
         setupSearch()
-
-        // Set up tab layout
         setupTabLayout()
 
-        // Set up SwipeRefreshLayout
         binding.swipeRefreshLayout.setOnRefreshListener {
             loadJournalEntries()
         }
 
-        // Set up the color scheme for the SwipeRefreshLayout
         binding.swipeRefreshLayout.setColorSchemeResources(
             android.R.color.holo_blue_light,
             android.R.color.holo_green_light,
@@ -78,45 +72,46 @@ class HomeFragment : Fragment() {
             android.R.color.holo_red_light
         )
 
-        // Initialize the adapter with an empty list first
-        journalAdapter = JournalAdapter(emptyList())
-        binding.journalRecyclerView.adapter = journalAdapter
-
-        // Load dummy data initially (for quick UI rendering)
-        loadDummyData()
-
-        // Load real data from Firebase
         loadJournalEntries()
+
+        requireActivity().supportFragmentManager.addOnBackStackChangedListener {
+            val fragment = requireActivity().supportFragmentManager.findFragmentById(R.id.fragmentContainer)
+            if (fragment !is MoodAnalysisFragment) {
+                binding.journalContentContainer.visibility = View.VISIBLE
+            }
+        }
     }
+
 
     private fun setupSearch() {
         val searchEditText = binding.searchEditText
         val clearSearchButton = binding.clearSearchButton
 
-        // Setup search input
         searchEditText.setOnEditorActionListener { _, actionId, event ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH ||
-                (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)
+                (event?.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)
             ) {
                 performSearch(searchEditText.text.toString())
+
+                // Hide keyboard
+                val imm = requireContext().getSystemService(InputMethodManager::class.java)
+                imm?.hideSoftInputFromWindow(searchEditText.windowToken, 0)
+
                 return@setOnEditorActionListener true
             }
-            return@setOnEditorActionListener false
+            false
         }
 
-        // Text change listener for real-time search and clear button visibility
         searchEditText.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 clearSearchButton.visibility = if (s.isNullOrEmpty()) View.GONE else View.VISIBLE
                 performSearch(s.toString())
             }
 
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun afterTextChanged(s: Editable?) {}
         })
 
-        // Clear search button
         clearSearchButton.setOnClickListener {
             searchEditText.text.clear()
             performSearch("")
@@ -131,11 +126,15 @@ class HomeFragment : Fragment() {
                         currentFilterMode = FilterMode.ALL_ENTRIES
                         applyFiltersAndSearch()
                         showJournalList()
+
+                        removeMoodAnalysisFragment()
                     }
                     1 -> {
                         currentFilterMode = FilterMode.MY_ENTRIES
                         applyFiltersAndSearch()
                         showJournalList()
+
+                        removeMoodAnalysisFragment()
                     }
                     2 -> {
                         currentFilterMode = FilterMode.MOOD_ANALYSIS
@@ -145,127 +144,63 @@ class HomeFragment : Fragment() {
             }
 
             override fun onTabUnselected(tab: TabLayout.Tab?) {}
-
             override fun onTabReselected(tab: TabLayout.Tab?) {}
         })
     }
 
+    private fun removeMoodAnalysisFragment() {
+        val fragmentManager = requireActivity().supportFragmentManager
+        val moodFragment = fragmentManager.findFragmentById(R.id.fragmentContainer)
+        if (moodFragment is MoodAnalysisFragment) {
+            fragmentManager.popBackStack()
+        }
+    }
+
+
     private fun showJournalList() {
-        // Show the journal list and hide any other views
         binding.journalContentContainer.visibility = View.VISIBLE
     }
 
     private fun openMoodAnalysisFragment() {
         try {
-            // Create the MoodAnalysisFragment
             val moodAnalysisFragment = MoodAnalysisFragment()
-
-            // Get the parent activity's fragment manager
-            val fragmentManager = requireActivity().supportFragmentManager
-
-            // Begin the transaction
-            val transaction = fragmentManager.beginTransaction()
-
-            // Replace the fragmentContainer with the new fragment
+            val transaction = requireActivity().supportFragmentManager.beginTransaction()
             transaction.replace(R.id.fragmentContainer, moodAnalysisFragment)
-
-            // Add to back stack so the user can navigate back
-            transaction.addToBackStack("Mood Analysis")
-
-            // Commit the transaction
+            transaction.addToBackStack(null)
             transaction.commit()
 
-            // Hide the journal content container
             binding.journalContentContainer.visibility = View.GONE
         } catch (e: Exception) {
-            // Log the error - in a real app you'd use proper logging
             println("Error navigating to MoodAnalysisFragment: ${e.message}")
             e.printStackTrace()
         }
     }
 
-    private fun loadDummyData() {
-        // Dummy data matching the updated JournalEntry structure
-        val currentUser = auth.currentUser
-        val userId = currentUser?.uid ?: ""
-
-        val dummyEntries = listOf(
-            JournalEntry(
-                id = "1",
-                userId = userId,
-                userName = "Raza",
-                content = "Today I felt hopeful.",
-                mood = "Hopeful",
-                timestamp = System.currentTimeMillis(),
-                likes = mapOf(),
-                isPublic = true
-            ),
-            JournalEntry(
-                id = "2",
-                userId = userId,
-                userName = "Sana",
-                content = "It was a tough day, but I managed.",
-                mood = "Tired",
-                timestamp = System.currentTimeMillis() - 3600000,
-                likes = mapOf(),
-                isPublic = true
-            ),
-            JournalEntry(
-                id = "3",
-                userId = userId,
-                userName = "Abdulrehman",
-                content = "Had a peaceful walk in the evening.",
-                mood = "Peaceful",
-                timestamp = System.currentTimeMillis() - 7200000,
-                likes = mapOf(),
-                isPublic = true
-            )
-        )
-
-        allJournalEntries.clear()
-        allJournalEntries.addAll(dummyEntries)
-
-        journalAdapter = JournalAdapter(dummyEntries)
-        binding.journalRecyclerView.adapter = journalAdapter
-    }
-
     private fun loadJournalEntries() {
         binding.swipeRefreshLayout.isRefreshing = true
 
-        database.addValueEventListener(object : ValueEventListener {
+        database.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val journalList = mutableListOf<JournalEntry>()
                 val currentUserId = auth.currentUser?.uid
 
                 for (journalSnapshot in snapshot.children) {
                     val journal = journalSnapshot.getValue(JournalEntry::class.java)
-
-                    // Only add entries that are either:
-                    // 1. Public entries from anyone
-                    // 2. Private entries that belong to the current user
-                    journal?.let {
-                        if (it.isPublic || it.userId == currentUserId) {
-                            journalList.add(it)
-                        }
+                    if (journal != null && (journal.public || journal.userId == currentUserId)) {
+                        journalList.add(journal)
                     }
                 }
 
-                // Sort by timestamp (newest first)
                 journalList.sortByDescending { it.timestamp }
 
-                // Save all entries for filtering
                 allJournalEntries.clear()
                 allJournalEntries.addAll(journalList)
 
-                // Apply filters and search
                 applyFiltersAndSearch()
-
-                // Stop refresh animation
                 binding.swipeRefreshLayout.isRefreshing = false
             }
 
             override fun onCancelled(error: DatabaseError) {
-                // Handle database error
                 binding.swipeRefreshLayout.isRefreshing = false
             }
         })
@@ -276,44 +211,34 @@ class HomeFragment : Fragment() {
         applyFiltersAndSearch()
     }
 
+    @OptIn(UnstableApi::class)
     private fun applyFiltersAndSearch() {
-        // Start with all entries
-        var filteredList = allJournalEntries.toMutableList()
+        _binding?.let { binding ->
 
-        // Apply tab filter
-        when (currentFilterMode) {
-            FilterMode.ALL_ENTRIES -> {
-                // No additional filtering needed
+            var filteredList = allJournalEntries.toMutableList()
+
+            when (currentFilterMode) {
+                FilterMode.ALL_ENTRIES -> { /* No filter */ }
+                FilterMode.MY_ENTRIES -> {
+                    val currentUserId = auth.currentUser?.uid ?: ""
+                    filteredList = filteredList.filter { it.userId == currentUserId }.toMutableList()
+                }
+                FilterMode.MOOD_ANALYSIS -> { /* Navigation already handled */ }
             }
-            FilterMode.MY_ENTRIES -> {
-                val currentUserId = auth.currentUser?.uid ?: ""
-                filteredList = filteredList.filter { it.userId == currentUserId }.toMutableList()
+
+            if (currentSearchQuery.isNotEmpty()) {
+                filteredList = filteredList.filter {
+                    it.userName.lowercase().contains(currentSearchQuery) ||
+                            it.mood.lowercase().contains(currentSearchQuery) ||
+                            it.content.lowercase().contains(currentSearchQuery)
+                }.toMutableList()
             }
-            FilterMode.MOOD_ANALYSIS -> {
-                // For mood analysis tab, we now navigate to MoodAnalysisFragment
-                // But we'll keep the filtering logic for backward compatibility
-            }
-        }
 
-        // Apply search filter if there's a query
-        if (currentSearchQuery.isNotEmpty()) {
-            filteredList = filteredList.filter {
-                it.userName.lowercase().contains(currentSearchQuery) ||
-                        it.mood.lowercase().contains(currentSearchQuery) ||
-                        it.content.lowercase().contains(currentSearchQuery)
-            }.toMutableList()
-        }
+            journalAdapter.updateData(filteredList)
 
-        // Update adapter
-        journalAdapter = JournalAdapter(filteredList)
-        binding.journalRecyclerView.adapter = journalAdapter
+            binding.emptyStateTextView.visibility = if (filteredList.isEmpty()) View.VISIBLE else View.GONE
 
-        // Show empty state if no entries
-        if (filteredList.isEmpty()) {
-            binding.emptyStateTextView.visibility = View.VISIBLE
-        } else {
-            binding.emptyStateTextView.visibility = View.GONE
-        }
+        } ?: Log.w("HomeFragment", "applyFiltersAndSearch() called after view destroyed")
     }
 
     override fun onDestroyView() {

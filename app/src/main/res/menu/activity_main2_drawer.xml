@@ -10,13 +10,15 @@
             android:icon="@drawable/icon_home_foreground"
             android:title="@string/menu_home" />
         <item
-            android:id="@+id/nav_new_entry"
-            android:icon="@drawable/icon_post_foreground"
-            android:title="@string/new_entry" />
+            android:id="@+id/nav_appointments"
+            android:title="Appointments" />
         <item
-            android:id="@+id/nav_therapists"
+            android:id="@+id/nav_client_progress"
+            android:title="Client Progress" />
+        <item
+            android:id="@+id/nav_profile"
             android:icon="@drawable/icon_profile_foreground"
-            android:title="@string/therapists" />
+            android:title="Profile" />
         <item
             android:id="@+id/nav_settings"
             android:icon="@drawable/settings"

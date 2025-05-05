@@ -9,5 +9,5 @@ data class JournalEntry(
     val mood: String = "",
     val timestamp: Long = 0L,
     val likes: Map<String, Boolean> = mapOf(),
-    val isPublic: Boolean = true
+    val public: Boolean = true
 )

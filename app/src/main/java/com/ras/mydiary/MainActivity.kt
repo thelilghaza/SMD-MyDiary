@@ -50,7 +50,7 @@ class MainActivity : AppCompatActivity() {
         val navController = navHostFragment.navController
 
         appBarConfiguration = AppBarConfiguration(
-            setOf(R.id.nav_home, R.id.nav_new_entry, R.id.nav_settings)
+            setOf(R.id.nav_home, R.id.nav_new_entry, R.id.nav_therapists, R.id.nav_settings)
         )
 
         setupActionBarWithNavController(navController, appBarConfiguration)
@@ -72,6 +72,10 @@ class MainActivity : AppCompatActivity() {
                 }
                 R.id.nav_new_entry -> {
                     navController.navigate(R.id.nav_new_entry)
+                    true
+                }
+                R.id.nav_therapists -> {
+                    navController.navigate(R.id.nav_therapists)
                     true
                 }
                 R.id.nav_settings -> {
@@ -97,7 +101,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
-            if (destination.id == R.id.nav_new_entry || destination.id == R.id.nav_settings) {
+            if (destination.id == R.id.nav_new_entry || destination.id == R.id.nav_therapists || destination.id == R.id.nav_settings) {
                 binding.appBarMain.fab.hide()
             } else {
                 binding.appBarMain.fab.show()

@@ -23,6 +23,8 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 import android.graphics.drawable.GradientDrawable
+import androidx.activity.addCallback
+import androidx.core.graphics.toColorInt
 
 class MoodAnalysisFragment : Fragment() {
 
@@ -44,7 +46,7 @@ class MoodAnalysisFragment : Fragment() {
     private var currentTimeRange = TimeRange.WEEKLY
 
     // Fixed mood bar color
-    private val moodBarColor = Color.parseColor("#9EB5DB")
+    private val moodBarColor = "#9EB5DB".toColorInt()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -69,6 +71,8 @@ class MoodAnalysisFragment : Fragment() {
             setupMoodFilterSpinner()
             loadJournalEntries()
         }
+
+        setupBackNavigation()
     }
 
     private fun setupLineChart() {
@@ -128,7 +132,7 @@ class MoodAnalysisFragment : Fragment() {
         val adapter = ArrayAdapter(
             requireContext(),
             android.R.layout.simple_spinner_item,
-            allMoodTypes.map { it.capitalize(Locale.getDefault()) }
+            allMoodTypes.map { it.replaceFirstChar { char -> char.uppercaseChar() } }
         )
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
 
@@ -210,7 +214,7 @@ class MoodAnalysisFragment : Fragment() {
         // Create chart data points
         moodFrequency.entries.forEachIndexed { index, (mood, count) ->
             chartEntries.add(Entry(index.toFloat(), count.toFloat()))
-            moodLabels.add(mood.capitalize(Locale.getDefault()))
+            moodLabels.add(mood.replaceFirstChar { it.uppercaseChar() })
         }
 
         // Set up line dataset
@@ -344,6 +348,12 @@ class MoodAnalysisFragment : Fragment() {
     private fun getMoodColor(mood: String): Int {
         // Always return the same blue color for all moods
         return moodBarColor
+    }
+
+    private fun setupBackNavigation() {
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+            requireActivity().supportFragmentManager.popBackStack()
+        }
     }
 
     enum class TimeRange {

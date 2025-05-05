@@ -14,7 +14,7 @@ import android.text.format.DateUtils
 import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
 
-class JournalAdapter(private val journalList: List<JournalEntry>) :
+class JournalAdapter(private var journalList: List<JournalEntry>) :
     RecyclerView.Adapter<JournalAdapter.JournalViewHolder>() {
 
     class JournalViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -28,6 +28,11 @@ class JournalAdapter(private val journalList: List<JournalEntry>) :
         val likeCount: TextView = itemView.findViewById(R.id.likeCountTextView)
         val readMore: TextView = itemView.findViewById(R.id.commentCountTextView)
         val privacyIcon: ImageView = itemView.findViewById(R.id.privacyIcon)
+    }
+
+    fun updateData(newList: List<JournalEntry>) {
+        this.journalList = newList
+        notifyDataSetChanged()
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): JournalViewHolder {
@@ -60,7 +65,7 @@ class JournalAdapter(private val journalList: List<JournalEntry>) :
         holder.likeCount.text = likesCount.toString()
 
         // Set privacy icon visibility
-        if (!journal.isPublic) {
+        if (!journal.public) {
             holder.privacyIcon.visibility = View.VISIBLE
         } else {
             holder.privacyIcon.visibility = View.GONE

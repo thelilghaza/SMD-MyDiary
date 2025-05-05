@@ -166,5 +166,15 @@
                 </FrameLayout>
             </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!-- Mood Analysis content container (to be shown/hidden based on tab) -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/moodAnalysisContainer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone">
+
+            <!-- Mood Analysis Fragment UI goes here -->
+        </androidx.constraintlayout.widget.ConstraintLayout>
     </FrameLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

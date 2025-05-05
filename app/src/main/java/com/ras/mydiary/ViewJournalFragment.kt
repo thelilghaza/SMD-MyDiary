@@ -83,7 +83,7 @@ class ViewJournalFragment : Fragment() {
                 loadJournalDetails()
             } else {
                 Toast.makeText(context, "Journal not found", Toast.LENGTH_SHORT).show()
-                requireActivity().onBackPressed()
+                requireActivity().onBackPressedDispatcher.onBackPressed()
             }
         }
 
