@@ -90,6 +90,9 @@ class LoginActivity : AppCompatActivity() {
                                 "therapist" -> {
                                     startActivity(Intent(this, MainActivity2::class.java))
                                 }
+                                "admin" -> {
+                                    startActivity(Intent(this, AdminDashboard::class.java))
+                                }
                                 else -> {
                                     Toast.makeText(this, "Unknown role", Toast.LENGTH_SHORT).show()
                                 }

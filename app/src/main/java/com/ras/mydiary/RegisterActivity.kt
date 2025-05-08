@@ -53,6 +53,7 @@ class RegisterActivity : AppCompatActivity() {
             val role = when (selectedRoleId) {
                 R.id.roleUserRadio -> "user"
                 R.id.roleTherapistRadio -> "therapist"
+                R.id.roleAdminRadio -> "admin"
                 else -> ""
             }
 
@@ -94,6 +95,7 @@ class RegisterActivity : AppCompatActivity() {
                                         when (roleValue) {
                                             "user" -> startActivity(Intent(this, MainActivity::class.java))
                                             "therapist" -> startActivity(Intent(this, MainActivity2::class.java))
+                                            "admin" -> startActivity(Intent(this, AdminDashboard::class.java))
                                             else -> Toast.makeText(this, "Unknown role", Toast.LENGTH_SHORT).show()
                                         }
 

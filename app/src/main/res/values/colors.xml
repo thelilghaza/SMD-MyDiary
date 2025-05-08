@@ -16,4 +16,8 @@
     <color name="colorBackground">#000000</color>
     <color name="colorSurface">#494949</color>
     <color name="colorOnBackground">#FFFFFF</color>
+
+    <!-- Add these color values to your colors.xml file -->
+    <color name="journaler_card_bg">#E8F5E9</color> <!-- Light green background for journalers -->
+    <color name="therapist_card_bg">#E8EAF6</color> <!-- Light indigo background for therapists -->
 </resources>

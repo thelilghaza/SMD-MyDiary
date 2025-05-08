@@ -36,6 +36,7 @@ class SplashActivity : AppCompatActivity() {
                     val intent = when (role) {
                         "user" -> Intent(this, MainActivity::class.java)
                         "therapist" -> Intent(this, MainActivity2::class.java)
+                        "admin" -> Intent(this, AdminDashboard::class.java)
                         else -> Intent(this, LoginActivity::class.java)
                     }
                     startActivity(intent)
