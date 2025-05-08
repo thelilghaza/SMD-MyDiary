@@ -1,116 +1,273 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:layout_height="match_parent">
 
-    <!-- Privacy Switch Section -->
-    <LinearLayout
+    <!-- Nested ScrollView for content scrolling -->
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp">
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:fillViewport="true"
+        android:padding="16dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Make Entry Public:"
-            android:layout_marginStart="5dp"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="#5B7CB1" />
-
-        <Switch
-            android:id="@+id/privacySwitch"
-            android:layout_width="wrap_content"
-            android:layout_height="48dp"
-            android:checked="true"
-            android:scaleX="1.2"
-            android:scaleY="1.2"
-            android:thumbTint="#5B7CB1"
-            android:trackTint="#AEC4E5" />
-    </LinearLayout>
-
-    <!-- Title Field -->
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Title"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:layout_marginStart="10dp"
-        android:layout_marginBottom="8dp" />
-
-    <EditText
-        android:id="@+id/entryTitle"
-        android:hint="Enter title here..."
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:minHeight="56dp"
-        android:padding="12dp"
-        android:layout_marginBottom="16dp"
-        android:background="@drawable/edit_text_bg" />
-
-    <!-- Mood Field -->
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Mood"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:layout_marginStart="10dp"
-        android:layout_marginBottom="8dp" />
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-        android:layout_marginBottom="16dp">
-
-        <AutoCompleteTextView
-            android:id="@+id/entryMood"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Select your mood"
-            android:inputType="none"
-            android:padding="12dp"/>
-    </com.google.android.material.textfield.TextInputLayout>
+            android:orientation="vertical">
 
-    <!-- Content Field -->
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Journal Entry"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:layout_marginStart="10dp"
-        android:layout_marginBottom="8dp" />
+            <!-- Privacy Switch Section with Card elevation -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp">
 
-    <EditText
-        android:id="@+id/entryContent"
-        android:hint="Write your thoughts..."
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:gravity="top"
-        android:inputType="textMultiLine"
-        android:padding="16dp"
-        android:background="@drawable/edit_text_bg" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="16dp">
 
-    <!-- Save Button -->
-    <Button
-        android:id="@+id/saveEntryButton"
-        android:text="SAVE ENTRY"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:layout_marginTop="24dp"
-        android:backgroundTint="#5B7CB1"
-        android:textColor="#FFFFFF"
-        android:textSize="16sp"
-        android:textStyle="bold" />
-</LinearLayout>
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Make Entry Public"
+                        android:textColor="#5B7CB1"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+                    <Switch
+                        android:id="@+id/privacySwitch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="48dp"
+                        android:checked="true"
+                        android:scaleX="1.2"
+                        android:scaleY="1.2"
+                        android:thumbTint="#5B7CB1"
+                        android:trackTint="#AEC4E5" />
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Title Field with Card elevation -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:text="Title"
+                        android:textColor="#5B7CB1"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Enter title here..."
+                        app:boxStrokeColor="#5B7CB1"
+                        app:hintTextColor="#5B7CB1">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/entryTitle"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="text" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Mood Field with Card elevation -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:text="Mood"
+                        android:textColor="#5B7CB1"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Select your mood"
+                        app:boxStrokeColor="#5B7CB1"
+                        app:hintTextColor="#5B7CB1">
+
+                        <AutoCompleteTextView
+                            android:id="@+id/entryMood"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="none" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Content Field with Card elevation and image support -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <!-- Header row with title and attachment icon -->
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentStart="true"
+                            android:layout_centerVertical="true"
+                            android:text="Journal Entry"
+                            android:textColor="#5B7CB1"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/inlineAttachButton"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:insetLeft="0dp"
+                            android:insetTop="0dp"
+                            android:insetRight="0dp"
+                            android:insetBottom="0dp"
+                            android:padding="0dp"
+                            app:backgroundTint="#5B7CB1"
+                            app:cornerRadius="24dp"
+                            app:icon="@android:drawable/ic_menu_camera"
+                            app:iconGravity="textStart"
+                            app:iconPadding="0dp"
+                            app:iconSize="24dp"
+                            app:iconTint="#FFFFFF" />
+                    </RelativeLayout>
+
+                    <!-- Journal content input field -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Write your thoughts..."
+                        app:boxStrokeColor="#5B7CB1"
+                        app:hintTextColor="#5B7CB1">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/entryContent"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="top"
+                            android:inputType="textMultiLine"
+                            android:minHeight="150dp" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- Preview area for attached image -->
+                    <LinearLayout
+                        android:id="@+id/inlineImagePreviewContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:orientation="vertical"
+                        android:visibility="gone">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="8dp"
+                            android:text="Attached Image"
+                            android:textColor="#5B7CB1"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+
+                        <androidx.cardview.widget.CardView
+                            android:id="@+id/sampleInlineImageCard"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="8dp"
+                            app:cardCornerRadius="8dp"
+                            app:cardElevation="1dp">
+
+                            <RelativeLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content">
+
+                                <ImageView
+                                    android:id="@+id/inlineImagePreview"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="150dp"
+                                    android:scaleType="centerCrop" />
+
+                                <ImageButton
+                                    android:id="@+id/removeInlineImageButton"
+                                    android:layout_width="36dp"
+                                    android:layout_height="36dp"
+                                    android:layout_alignParentEnd="true"
+                                    android:layout_margin="8dp"
+                                    android:background="@drawable/circle_button_bg"
+                                    android:contentDescription="Remove image"
+                                    android:src="@android:drawable/ic_menu_close_clear_cancel"
+                                    app:tint="#FFFFFF" />
+                            </RelativeLayout>
+                        </androidx.cardview.widget.CardView>
+                    </LinearLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Save Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/saveEntryButton"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="16dp"
+                android:backgroundTint="#5B7CB1"
+                android:text="SAVE ENTRY"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:cornerRadius="12dp"
+                app:elevation="4dp" />
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

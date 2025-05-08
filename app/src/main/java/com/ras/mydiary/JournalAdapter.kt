@@ -11,11 +11,15 @@ import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import android.os.Bundle
 import android.text.format.DateUtils
+import android.util.Log
 import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
 
 class JournalAdapter(private var journalList: List<JournalEntry>) :
     RecyclerView.Adapter<JournalAdapter.JournalViewHolder>() {
+
+    private val TAG = "JournalAdapter"
+    private val API_BASE_URL = "http://192.168.100.69/mydiary_api" // Update this to match your actual API URL
 
     class JournalViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val profileImageView: ImageView = itemView.findViewById(R.id.profileImageView)
@@ -28,6 +32,7 @@ class JournalAdapter(private var journalList: List<JournalEntry>) :
         val likeCount: TextView = itemView.findViewById(R.id.likeCountTextView)
         val readMore: TextView = itemView.findViewById(R.id.commentCountTextView)
         val privacyIcon: ImageView = itemView.findViewById(R.id.privacyIcon)
+        val imagePreview: ImageView = itemView.findViewById(R.id.image_preview)
     }
 
     fun updateData(newList: List<JournalEntry>) {
@@ -48,7 +53,7 @@ class JournalAdapter(private var journalList: List<JournalEntry>) :
         // Set username
         holder.userName.text = journal.userName
 
-        // Set title - this was missing
+        // Set title
         holder.titleTextView.text = journal.title
 
         // Set content (limit to 3 lines, ellipsize if longer)
@@ -81,22 +86,39 @@ class JournalAdapter(private var journalList: List<JournalEntry>) :
 
         // Add click listener for like icon
         holder.likeIcon.setOnClickListener {
-            // Handling like feature should be done in the detail view
             // Navigate to journal detail
             navigateToDetail(holder, journal)
         }
 
         // Set the profile image
         try {
-            // Try to load user image if available
-            // For now, just use a placeholder
             Glide.with(holder.itemView.context)
                 .load(R.drawable.icon_profile_foreground)
                 .circleCrop()
                 .into(holder.profileImageView)
         } catch (e: Exception) {
-            // Fallback for errors
             holder.profileImageView.setImageResource(R.drawable.icon_profile_foreground)
+        }
+
+        // Handle image preview - using the fetch_image.php API
+        if (journal.id.isNotEmpty()) {
+            // Construct the API URL to fetch the image
+            val imageUrl = "$API_BASE_URL/fetch_image.php?entryId=${journal.id}"
+
+            try {
+                // Load image using Glide
+                Glide.with(holder.itemView.context)
+                    .load(imageUrl)
+                    .centerCrop()
+                    .into(holder.imagePreview)
+
+                holder.imagePreview.visibility = View.VISIBLE
+            } catch (e: Exception) {
+                Log.e(TAG, "Error loading image from API: ${e.message}")
+                holder.imagePreview.visibility = View.GONE
+            }
+        } else {
+            holder.imagePreview.visibility = View.GONE
         }
 
         // Set click listener for the entire item
@@ -124,30 +146,20 @@ class JournalAdapter(private var journalList: List<JournalEntry>) :
         val now = System.currentTimeMillis()
 
         return when {
-            // Same day
             DateUtils.isToday(timestamp) -> {
-                // Format as "Today at HH:mm"
                 "Today at ${SimpleDateFormat("h:mm a", Locale.getDefault()).format(Date(timestamp))}"
             }
-            // Yesterday
             DateUtils.isToday(timestamp + DateUtils.DAY_IN_MILLIS) -> {
-                // Format as "Yesterday at HH:mm"
                 "Yesterday at ${SimpleDateFormat("h:mm a", Locale.getDefault()).format(Date(timestamp))}"
             }
-            // This week (within 7 days)
             now - timestamp < 7 * DateUtils.DAY_IN_MILLIS -> {
-                // Format as "DayOfWeek at HH:mm"
                 SimpleDateFormat("EEEE 'at' h:mm a", Locale.getDefault()).format(Date(timestamp))
             }
-            // This year
             Calendar.getInstance().apply { timeInMillis = now }.get(Calendar.YEAR) ==
                     Calendar.getInstance().apply { timeInMillis = timestamp }.get(Calendar.YEAR) -> {
-                // Format as "MMM d at HH:mm"
                 SimpleDateFormat("MMM d 'at' h:mm a", Locale.getDefault()).format(Date(timestamp))
             }
-            // Different year
             else -> {
-                // Format as "MMM d, YYYY"
                 SimpleDateFormat("MMM d, yyyy", Locale.getDefault()).format(Date(timestamp))
             }
         }
