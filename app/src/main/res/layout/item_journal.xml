@@ -67,7 +67,7 @@
                 android:textSize="12sp" />
         </LinearLayout>
 
-        <!-- Added Title TextView -->
+        <!-- Title TextView -->
         <TextView
             android:id="@+id/titleTextView"
             android:layout_width="match_parent"
@@ -88,6 +88,16 @@
             android:text="Journal content here..."
             android:textColor="#333333"
             android:textSize="14sp" />
+
+        <!-- Image Preview - initially hidden -->
+        <ImageView
+            android:id="@+id/image_preview"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:contentDescription="Journal Image Preview"
+            android:scaleType="centerCrop"
+            android:visibility="gone"
+            android:layout_marginBottom="8dp" />
 
         <LinearLayout
             android:layout_width="match_parent"

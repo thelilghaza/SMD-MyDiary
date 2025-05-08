@@ -2,22 +2,36 @@ package com.ras.mydiary
 
 import android.app.AlertDialog
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import org.json.JSONObject
+import java.io.BufferedReader
+import java.io.InputStreamReader
+import java.io.OutputStream
+import java.net.HttpURLConnection
+import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.Executors
 
 class ViewJournalFragment : Fragment() {
+
+    private val TAG = "ViewJournalFragment"
+    private val API_BASE_URL = "http://192.168.100.69/mydiary_api"
 
     private lateinit var journalId: String
     private lateinit var database: DatabaseReference
@@ -38,6 +52,7 @@ class ViewJournalFragment : Fragment() {
     private lateinit var editButton: Button
     private lateinit var saveButton: Button
     private lateinit var deleteButton: Button
+    private lateinit var imageView: ImageView
 
     private var isOwner = false
     private var isEditing = false
@@ -75,6 +90,7 @@ class ViewJournalFragment : Fragment() {
         editButton = view.findViewById(R.id.edit_button)
         saveButton = view.findViewById(R.id.save_button)
         deleteButton = view.findViewById(R.id.delete_button)
+        imageView = view.findViewById(R.id.detail_image)
 
         // Get journal ID from arguments
         arguments?.let {
@@ -138,6 +154,26 @@ class ViewJournalFragment : Fragment() {
                     moodTextView.text = it.mood
                     moodEditText.setText(it.mood)
 
+                    // Load image using the fetch_image.php API
+                    if (journalId.isNotEmpty()) {
+                        val imageUrl = "$API_BASE_URL/fetch_image.php?entryId=$journalId"
+
+                        try {
+                            Glide.with(requireContext())
+                                .load(imageUrl)
+                                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                                .skipMemoryCache(true)
+                                .into(imageView)
+
+                            imageView.visibility = View.VISIBLE
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Error loading image: ${e.message}")
+                            imageView.visibility = View.GONE
+                        }
+                    } else {
+                        imageView.visibility = View.GONE
+                    }
+
                     // Format and display timestamp
                     val dateFormat = SimpleDateFormat("dd MMM yyyy, hh:mm a", Locale.getDefault())
                     timestampTextView.text = dateFormat.format(Date(it.timestamp))
@@ -167,6 +203,7 @@ class ViewJournalFragment : Fragment() {
 
             override fun onCancelled(error: DatabaseError) {
                 Toast.makeText(context, "Error: ${error.message}", Toast.LENGTH_SHORT).show()
+                Log.e(TAG, "Database error: ${error.message}")
             }
         }
 
@@ -197,6 +234,7 @@ class ViewJournalFragment : Fragment() {
                 isLiked = true
                 updateLikeButton()
                 Toast.makeText(context, "Failed to unlike: ${e.message}", Toast.LENGTH_SHORT).show()
+                Log.e(TAG, "Failed to unlike: ${e.message}")
             }
         } else {
             // Like - update UI first for responsiveness
@@ -213,12 +251,12 @@ class ViewJournalFragment : Fragment() {
                 isLiked = false
                 updateLikeButton()
                 Toast.makeText(context, "Failed to like: ${e.message}", Toast.LENGTH_SHORT).show()
+                Log.e(TAG, "Failed to like: ${e.message}")
             }
         }
     }
 
     private fun updateLikeButton() {
-        // Update like button appearance based on isLiked status
         likeButton.setImageResource(
             if (isLiked) R.drawable.ic_heart_filled
             else R.drawable.ic_heart_outline
@@ -234,6 +272,7 @@ class ViewJournalFragment : Fragment() {
         contentEditText.visibility = if (editing) View.VISIBLE else View.GONE
         moodTextView.visibility = if (editing) View.GONE else View.VISIBLE
         moodEditText.visibility = if (editing) View.VISIBLE else View.GONE
+        imageView.visibility = if (editing) View.GONE else View.VISIBLE
 
         editButton.visibility = if (editing) View.GONE else (if (isOwner) View.VISIBLE else View.GONE)
         saveButton.visibility = if (editing) View.VISIBLE else View.GONE
@@ -287,6 +326,7 @@ class ViewJournalFragment : Fragment() {
             }
             .addOnFailureListener { e ->
                 Toast.makeText(context, "Failed to update: ${e.message}", Toast.LENGTH_SHORT).show()
+                Log.e(TAG, "Failed to update journal: ${e.message}")
 
                 // Restore button state
                 saveButton.isEnabled = true
@@ -321,16 +361,19 @@ class ViewJournalFragment : Fragment() {
         // Show a loading message
         Toast.makeText(context, "Deleting entry...", Toast.LENGTH_SHORT).show()
 
-        // Delete the journal from Firebase
+        // First, delete the journal from Firebase
         database.child(journalId).removeValue()
             .addOnSuccessListener {
-                Toast.makeText(context, "Journal deleted successfully", Toast.LENGTH_SHORT).show()
-
-                // Navigate back to home fragment ONLY on successful deletion
-                navigateToHome()
+                // After successful Firebase deletion, delete the image via API
+                deleteImageFromServer {
+                    Toast.makeText(context, "Journal deleted successfully", Toast.LENGTH_SHORT).show()
+                    // Navigate back to home fragment ONLY on successful deletion
+                    navigateToHome()
+                }
             }
             .addOnFailureListener { e ->
-                Toast.makeText(context, "Failed to delete: ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Failed to delete journal: ${e.message}", Toast.LENGTH_SHORT).show()
+                Log.e(TAG, "Failed to delete journal: ${e.message}")
 
                 // Re-enable buttons
                 deleteButton.isEnabled = true
@@ -340,6 +383,50 @@ class ViewJournalFragment : Fragment() {
                 // Reattach listener
                 loadJournalDetails()
             }
+    }
+
+    private fun deleteImageFromServer(onComplete: () -> Unit) {
+        // Run the network request in a background thread
+        Executors.newSingleThreadExecutor().execute {
+            try {
+                val url = URL("$API_BASE_URL/delete_image.php")
+                val connection = url.openConnection() as HttpURLConnection
+                connection.requestMethod = "POST"
+                connection.setRequestProperty("Content-Type", "application/json")
+                connection.doOutput = true
+
+                // Prepare JSON payload
+                val jsonInputString = JSONObject().apply {
+                    put("entryId", journalId)
+                }.toString()
+
+                // Send the request
+                connection.outputStream.use { outputStream ->
+                    outputStream.write(jsonInputString.toByteArray())
+                    outputStream.flush()
+                }
+
+                // Check response code
+                if (connection.responseCode == HttpURLConnection.HTTP_OK) {
+                    val response = BufferedReader(InputStreamReader(connection.inputStream)).use { it.readText() }
+                    val jsonResponse = JSONObject(response)
+                    if (jsonResponse.optBoolean("success", false)) {
+                        Log.d(TAG, "Image deleted successfully: ${jsonResponse.getString("message")}")
+                    } else {
+                        Log.e(TAG, "Failed to delete image: ${jsonResponse.optString("message", "Unknown error")}")
+                    }
+                } else {
+                    Log.e(TAG, "Failed to delete image: HTTP ${connection.responseCode}")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error deleting image: ${e.message}")
+            } finally {
+                // Run onComplete callback on the main thread
+                activity?.runOnUiThread {
+                    onComplete()
+                }
+            }
+        }
     }
 
     private fun navigateToHome() {

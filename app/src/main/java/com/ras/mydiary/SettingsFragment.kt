@@ -125,7 +125,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
             val updatedUserData = mutableMapOf<String, Any>(
                 "name" to newName,
                 "username" to newUsername,
-                "contactNumber" to newContact
+                "phone" to newContact
             )
 
             // Add image if it was changed
