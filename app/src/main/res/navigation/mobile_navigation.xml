@@ -12,10 +12,16 @@
         tools:layout="@layout/fragment_home" />
 
     <fragment
-        android:id="@+id/nav_new_entry"
-        android:name="com.ras.mydiary.NewEntryFragment"
+        android:id="@+id/nav_ai_journal"
+        android:name="com.ras.mydiary.AIJournalFragment"
+        android:label="AI Journal"
+        tools:layout="@layout/fragment_ai_journal" />
+
+    <fragment
+        android:id="@+id/nav_manual_journal"
+        android:name="com.ras.mydiary.ManualJournalFragment"
         android:label="New Entry"
-        tools:layout="@layout/fragment_new_entry" />
+        tools:layout="@layout/fragment_manual_journal" />
 
     <fragment
         android:id="@+id/nav_settings"

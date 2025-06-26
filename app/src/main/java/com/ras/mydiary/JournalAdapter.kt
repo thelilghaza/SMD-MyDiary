@@ -12,14 +12,17 @@ import androidx.recyclerview.widget.RecyclerView
 import android.os.Bundle
 import android.text.format.DateUtils
 import android.util.Log
-import com.bumptech.glide.Glide
+import com.android.volley.Request
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
 import com.google.firebase.auth.FirebaseAuth
+import org.json.JSONObject
 
 class JournalAdapter(private var journalList: List<JournalEntry>) :
     RecyclerView.Adapter<JournalAdapter.JournalViewHolder>() {
 
     private val TAG = "JournalAdapter"
-    private val API_BASE_URL = "http://192.168.100.69/mydiary_api" // Update this to match your actual API URL
+    private val API_BASE_URL = "http://192.168.155.103/mydiary_api"
 
     class JournalViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val profileImageView: ImageView = itemView.findViewById(R.id.profileImageView)
@@ -84,61 +87,69 @@ class JournalAdapter(private var journalList: List<JournalEntry>) :
             holder.likeIcon.setImageResource(R.drawable.ic_heart_outline)
         }
 
-        // Add click listener for like icon
-        holder.likeIcon.setOnClickListener {
-            // Navigate to journal detail
-            navigateToDetail(holder, journal)
-        }
-
         // Set the profile image
         try {
-            Glide.with(holder.itemView.context)
-                .load(R.drawable.icon_profile_foreground)
-                .circleCrop()
-                .into(holder.profileImageView)
-        } catch (e: Exception) {
             holder.profileImageView.setImageResource(R.drawable.icon_profile_foreground)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error setting profile image: ${e.message}")
         }
 
-        // Handle image preview - using the fetch_image.php API
+        // Handle image preview - hide it by default
+        holder.imagePreview.visibility = View.GONE
+
+        // Only try to load an image if we have an entry ID
         if (journal.id.isNotEmpty()) {
-            // Construct the API URL to fetch the image
-            val imageUrl = "$API_BASE_URL/fetch_image.php?entryId=${journal.id}"
+            // Construct the API URL to fetch the image as JSON
+            val imageUrl = "$API_BASE_URL/fetch_image.php?entryId=${journal.id}&format=json"
 
-            try {
-                // Load image using Glide
-                Glide.with(holder.itemView.context)
-                    .load(imageUrl)
-                    .centerCrop()
-                    .into(holder.imagePreview)
+            // Use Volley to check if the image exists
+            val jsonObjectRequest = JsonObjectRequest(
+                Request.Method.GET, imageUrl, null,
+                { response ->
+                    // Check if the response contains image data
+                    if (response.has("imageData") && !response.getString("imageData").isNullOrEmpty()) {
+                        // Image exists, convert base64 to bitmap
+                        try {
+                            val base64Image = response.getString("imageData")
+                            val bitmap = ImageUtils.base64ToBitmap(base64Image)
 
-                holder.imagePreview.visibility = View.VISIBLE
-            } catch (e: Exception) {
-                Log.e(TAG, "Error loading image from API: ${e.message}")
-                holder.imagePreview.visibility = View.GONE
-            }
-        } else {
-            holder.imagePreview.visibility = View.GONE
+                            if (bitmap != null) {
+                                // Set the bitmap to the ImageView
+                                holder.imagePreview.setImageBitmap(bitmap)
+                                holder.imagePreview.visibility = View.VISIBLE
+                            }
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Error converting image: ${e.message}")
+                        }
+                    }
+                },
+                { error ->
+                    Log.e(TAG, "Error checking for image: ${error.message}")
+                }
+            )
+
+            // Add the request to the queue
+            Volley.newRequestQueue(holder.itemView.context).add(jsonObjectRequest)
         }
 
-        // Set click listener for the entire item
+        // Set click listeners
         holder.itemView.setOnClickListener {
             navigateToDetail(holder, journal)
         }
 
-        // Set click listener for read more
         holder.readMore.setOnClickListener {
+            navigateToDetail(holder, journal)
+        }
+
+        holder.likeIcon.setOnClickListener {
             navigateToDetail(holder, journal)
         }
     }
 
     private fun navigateToDetail(holder: JournalViewHolder, journal: JournalEntry) {
-        // Create bundle with journal ID
         val bundle = Bundle().apply {
             putString("journal_id", journal.id)
         }
-
-        // Navigate to journal detail fragment
         holder.itemView.findNavController().navigate(R.id.nav_view_journal, bundle)
     }
 

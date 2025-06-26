@@ -40,7 +40,7 @@ class MainActivity : AppCompatActivity() {
 
         binding.appBarMain.fab.setOnClickListener {
             val navController = findNavController(R.id.nav_host_fragment_content_main)
-            navController.navigate(R.id.nav_new_entry)
+            navController.navigate(R.id.nav_manual_journal)
         }
 
         val drawerLayout: DrawerLayout = binding.drawerLayout
@@ -50,7 +50,7 @@ class MainActivity : AppCompatActivity() {
         val navController = navHostFragment.navController
 
         appBarConfiguration = AppBarConfiguration(
-            setOf(R.id.nav_home, R.id.nav_new_entry, R.id.nav_therapists, R.id.nav_settings)
+            setOf(R.id.nav_home, R.id.nav_manual_journal, R.id.nav_ai_journal, R.id.nav_therapists, R.id.nav_settings)
         )
 
         setupActionBarWithNavController(navController, appBarConfiguration)
@@ -70,8 +70,12 @@ class MainActivity : AppCompatActivity() {
                     navController.navigate(R.id.nav_home)
                     true
                 }
-                R.id.nav_new_entry -> {
-                    navController.navigate(R.id.nav_new_entry)
+                R.id.nav_ai_journal -> {
+                    navController.navigate(R.id.nav_ai_journal)
+                    true
+                }
+                R.id.nav_manual_journal -> {
+                    navController.navigate(R.id.nav_manual_journal)
                     true
                 }
                 R.id.nav_therapists -> {
@@ -101,7 +105,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
-            if (destination.id == R.id.nav_new_entry || destination.id == R.id.nav_therapists || destination.id == R.id.nav_settings) {
+            if (destination.id == R.id.nav_manual_journal || destination.id == R.id.nav_ai_journal || destination.id == R.id.nav_therapists || destination.id == R.id.nav_settings) {
                 binding.appBarMain.fab.hide()
             } else {
                 binding.appBarMain.fab.show()

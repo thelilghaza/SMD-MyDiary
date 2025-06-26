@@ -89,15 +89,21 @@
             android:textColor="#333333"
             android:textSize="14sp" />
 
-        <!-- Image Preview - initially hidden -->
         <ImageView
             android:id="@+id/image_preview"
             android:layout_width="match_parent"
-            android:layout_height="100dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="8dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
             android:contentDescription="Journal Image Preview"
-            android:scaleType="centerCrop"
-            android:visibility="gone"
-            android:layout_marginBottom="8dp" />
+            android:adjustViewBounds="true"
+            android:scaleType="center"
+            android:maxHeight="150dp"
+            android:padding="8dp"
+            android:background="@drawable/rounded_image_bg"
+            android:visibility="gone" />
 
         <LinearLayout
             android:layout_width="match_parent"

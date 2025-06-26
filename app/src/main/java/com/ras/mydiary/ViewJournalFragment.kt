@@ -7,11 +7,20 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import com.android.volley.Request
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
+import com.bumptech.glide.request.target.Target
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.load.DataSource
+import android.graphics.drawable.Drawable
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
@@ -28,10 +37,11 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.Executors
 
+
 class ViewJournalFragment : Fragment() {
 
     private val TAG = "ViewJournalFragment"
-    private val API_BASE_URL = "http://192.168.100.69/mydiary_api"
+    private val API_BASE_URL = "http://192.168.155.103/mydiary_api"
 
     private lateinit var journalId: String
     private lateinit var database: DatabaseReference
@@ -53,6 +63,7 @@ class ViewJournalFragment : Fragment() {
     private lateinit var saveButton: Button
     private lateinit var deleteButton: Button
     private lateinit var imageView: ImageView
+    private lateinit var imageContainer: CardView
 
     private var isOwner = false
     private var isEditing = false
@@ -91,6 +102,8 @@ class ViewJournalFragment : Fragment() {
         saveButton = view.findViewById(R.id.save_button)
         deleteButton = view.findViewById(R.id.delete_button)
         imageView = view.findViewById(R.id.detail_image)
+        imageContainer = view.findViewById(R.id.detail_image_container)
+
 
         // Get journal ID from arguments
         arguments?.let {
@@ -154,24 +167,51 @@ class ViewJournalFragment : Fragment() {
                     moodTextView.text = it.mood
                     moodEditText.setText(it.mood)
 
-                    // Load image using the fetch_image.php API
+                    // In loadJournalDetails(), replace your current image loading code with this:
                     if (journalId.isNotEmpty()) {
-                        val imageUrl = "$API_BASE_URL/fetch_image.php?entryId=$journalId"
+                        // Request the image as JSON format to get the base64 string
+                        val imageJsonUrl = "$API_BASE_URL/fetch_image.php?entryId=$journalId&format=json"
 
                         try {
-                            Glide.with(requireContext())
-                                .load(imageUrl)
-                                .diskCacheStrategy(DiskCacheStrategy.NONE)
-                                .skipMemoryCache(true)
-                                .into(imageView)
+                            // Make a simple Volley request to get the JSON data
+                            val jsonObjectRequest = JsonObjectRequest(
+                                Request.Method.GET, imageJsonUrl, null,
+                                { response ->
+                                    try {
+                                        val base64Image = response.optString("imageData", "")
+                                        if (base64Image.isNotEmpty()) {
+                                            // Use your ImageUtils to convert base64 to bitmap
+                                            val bitmap = ImageUtils.base64ToBitmap(base64Image)
+                                            if (bitmap != null) {
+                                                imageView.setImageBitmap(bitmap)
+                                                imageContainer.visibility = View.VISIBLE
+                                            } else {
+                                                Log.e(TAG, "Failed to convert base64 to bitmap")
+                                                imageContainer.visibility = View.GONE
+                                            }
+                                        } else {
+                                            Log.e(TAG, "Empty base64 string received")
+                                            imageContainer.visibility = View.GONE
+                                        }
+                                    } catch (e: Exception) {
+                                        Log.e(TAG, "Error processing image response: ${e.message}")
+                                        imageContainer.visibility = View.GONE
+                                    }
+                                },
+                                { error ->
+                                    Log.e(TAG, "Error loading image: ${error.message}")
+                                    imageContainer.visibility = View.GONE
+                                }
+                            )
 
-                            imageView.visibility = View.VISIBLE
+                            // Add the request to the RequestQueue
+                            Volley.newRequestQueue(requireContext()).add(jsonObjectRequest)
                         } catch (e: Exception) {
-                            Log.e(TAG, "Error loading image: ${e.message}")
-                            imageView.visibility = View.GONE
+                            Log.e(TAG, "Error setting up image request: ${e.message}")
+                            imageContainer.visibility = View.GONE
                         }
                     } else {
-                        imageView.visibility = View.GONE
+                        imageContainer.visibility = View.GONE
                     }
 
                     // Format and display timestamp
@@ -272,7 +312,7 @@ class ViewJournalFragment : Fragment() {
         contentEditText.visibility = if (editing) View.VISIBLE else View.GONE
         moodTextView.visibility = if (editing) View.GONE else View.VISIBLE
         moodEditText.visibility = if (editing) View.VISIBLE else View.GONE
-        imageView.visibility = if (editing) View.GONE else View.VISIBLE
+        imageContainer.visibility = if (editing) View.GONE else View.VISIBLE
 
         editButton.visibility = if (editing) View.GONE else (if (isOwner) View.VISIBLE else View.GONE)
         saveButton.visibility = if (editing) View.VISIBLE else View.GONE

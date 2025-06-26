@@ -40,7 +40,6 @@ android {
 }
 
 dependencies {
-    implementation(libs.full.sdk)
     implementation(libs.onesignal)
     implementation(libs.lottie)
     implementation(libs.androidx.recyclerview)
@@ -59,12 +58,11 @@ dependencies {
     implementation(libs.androidx.annotation)
     implementation(libs.androidx.activity)
     implementation(libs.firebase.database)
-    implementation (libs.json)
-    implementation (libs.glide.v4120)
+    implementation(libs.json)
+    implementation(libs.volley)
     annotationProcessor (libs.compiler)
-    implementation (libs.squareup.okhttp)
-    implementation (libs.glide)
-    annotationProcessor (libs.compiler)
+    implementation(libs.okhttp)
+    annotationProcessor(libs.compiler)
     implementation(libs.firebase.firestore)
     implementation(libs.androidx.ui.text.android)
     implementation(libs.androidx.swiperefreshlayout)

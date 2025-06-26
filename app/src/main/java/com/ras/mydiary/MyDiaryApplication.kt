@@ -11,10 +11,8 @@ class MyDiaryApplication : Application() {
         super.onCreate()
 
         FirebaseAuth.getInstance()
-        FirebaseDatabase.getInstance().setPersistenceEnabled(true) // Optional: enables offline persistence
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true)
 
         OneSignal.initWithContext(this,"a3838d33-5b9f-4f54-ad93-4b0ac2474988")
-
-        // Other initializations can go here if needed
     }
 }
