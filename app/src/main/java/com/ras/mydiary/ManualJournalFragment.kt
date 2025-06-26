@@ -1,5 +1,6 @@
 package com.ras.mydiary
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -20,7 +21,7 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.ras.mydiary.databinding.FragmentNewEntryBinding
+import com.ras.mydiary.databinding.FragmentManualJournalBinding
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -29,9 +30,10 @@ import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.util.Locale
 import java.util.concurrent.TimeUnit
+import androidx.core.graphics.scale
 
-class NewEntryFragment : Fragment() {
-    private var _binding: FragmentNewEntryBinding? = null
+class ManualJournalFragment : Fragment() {
+    private var _binding: FragmentManualJournalBinding? = null
     private val binding get() = _binding!!
 
     private lateinit var auth: FirebaseAuth
@@ -40,7 +42,7 @@ class NewEntryFragment : Fragment() {
     private val usersRef = database.getReference("Users")
     private var selectedImageBase64: String? = null
 
-    private val TAG = "NewEntryFragment"
+    private val tag = "ManualJournalFragment"
 
     // HTTP Client with longer timeouts for image upload
     private val client = OkHttpClient.Builder()
@@ -80,7 +82,7 @@ class NewEntryFragment : Fragment() {
                         val newWidth = (width * ratio).toInt()
                         val newHeight = (height * ratio).toInt()
 
-                        resizedBitmap = Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true)
+                        resizedBitmap = bitmap.scale(newWidth, newHeight)
 
                         // Recycle original bitmap if it's different
                         if (resizedBitmap != bitmap) {
@@ -100,7 +102,7 @@ class NewEntryFragment : Fragment() {
                     binding.removeInlineImageButton.visibility = View.VISIBLE
                 } catch (e: Exception) {
                     Toast.makeText(context, "Error selecting image: ${e.message}", Toast.LENGTH_SHORT).show()
-                    Log.e(TAG, "Image selection error", e)
+                    Log.e(tag, "Image selection error", e)
                 }
             }
         }
@@ -111,7 +113,7 @@ class NewEntryFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentNewEntryBinding.inflate(inflater, container, false)
+        _binding = FragmentManualJournalBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -155,6 +157,7 @@ class NewEntryFragment : Fragment() {
         (binding.entryMood as? AutoCompleteTextView)?.setAdapter(adapter)
     }
 
+    @SuppressLint("SetTextI18n")
     private fun saveJournalEntry() {
         val title = binding.entryTitle.text.toString().trim()
         val mood = binding.entryMood.text.toString().trim().lowercase(Locale.getDefault())
@@ -227,7 +230,7 @@ class NewEntryFragment : Fragment() {
 
         val requestBody = json.toString().toRequestBody("application/json".toMediaType())
         val request = Request.Builder()
-            .url("http://192.168.100.69/mydiary_api/upload_image.php")
+            .url("http://192.168.155.103/mydiary_api/upload_image.php")
             .post(requestBody)
             .build()
 
@@ -235,10 +238,10 @@ class NewEntryFragment : Fragment() {
             override fun onFailure(call: Call, e: IOException) {
                 requireActivity().runOnUiThread {
                     Toast.makeText(context, "Image upload failed: ${e.message}", Toast.LENGTH_LONG).show()
-                    Log.e(TAG, "Upload failed", e)
+                    Log.e(tag, "Upload failed", e)
 
                     // Even if image upload fails, proceed with saving the entry to Firebase without image
-                    Log.d(TAG, "Continuing to save entry without image")
+                    Log.d(tag, "Continuing to save entry without image")
                     val title = binding.entryTitle.text.toString().trim()
                     val mood = binding.entryMood.text.toString().trim().lowercase(Locale.getDefault())
                     val content = binding.entryContent.text.toString().trim()
@@ -253,11 +256,11 @@ class NewEntryFragment : Fragment() {
                 requireActivity().runOnUiThread {
                     if (response.isSuccessful && responseBody != null) {
                         try {
-                            Log.d(TAG, "Response: $responseBody")
+                            Log.d(tag, "Response: $responseBody")
                             val jsonResponse = JSONObject(responseBody)
                             if (jsonResponse.has("error")) {
                                 Toast.makeText(context, "Upload error: ${jsonResponse.getString("error")}", Toast.LENGTH_LONG).show()
-                                Log.e(TAG, "Server error: ${jsonResponse.getString("error")}")
+                                Log.e(tag, "Server error: ${jsonResponse.getString("error")}")
 
                                 // Even if server returns error, proceed with saving entry
                                 val title = binding.entryTitle.text.toString().trim()
@@ -272,7 +275,7 @@ class NewEntryFragment : Fragment() {
                             }
                         } catch (e: Exception) {
                             Toast.makeText(context, "Error processing response: ${e.message}", Toast.LENGTH_LONG).show()
-                            Log.e(TAG, "Response parsing error", e)
+                            Log.e(tag, "Response parsing error", e)
 
                             // Continue with saving entry
                             val title = binding.entryTitle.text.toString().trim()
@@ -284,7 +287,7 @@ class NewEntryFragment : Fragment() {
                         }
                     } else {
                         Toast.makeText(context, "Image upload failed: HTTP ${response.code}", Toast.LENGTH_LONG).show()
-                        Log.e(TAG, "Upload failed: HTTP ${response.code}, Body: $responseBody")
+                        Log.e(tag, "Upload failed: HTTP ${response.code}, Body: $responseBody")
 
                         // Continue with saving entry
                         val title = binding.entryTitle.text.toString().trim()
@@ -299,6 +302,7 @@ class NewEntryFragment : Fragment() {
         })
     }
 
+    @SuppressLint("SetTextI18n")
     private fun saveJournalToFirebase(
         entryId: String,
         userId: String,
@@ -331,7 +335,7 @@ class NewEntryFragment : Fragment() {
             }
             .addOnFailureListener { e ->
                 Toast.makeText(context, "Error saving entry: ${e.message}", Toast.LENGTH_SHORT).show()
-                Log.e(TAG, "Firebase save error", e)
+                Log.e(tag, "Firebase save error", e)
                 binding.saveEntryButton.isEnabled = true
                 binding.saveEntryButton.text = "Save Entry"
             }
@@ -359,7 +363,7 @@ class NewEntryFragment : Fragment() {
             override fun onCancelled(error: DatabaseError) {
                 val fallbackName = auth.currentUser?.email?.substringBefore('@') ?: "Anonymous"
                 callback(fallbackName)
-                Log.e(TAG, "Username fetch cancelled", error.toException())
+                Log.e(tag, "Username fetch cancelled", error.toException())
             }
         })
     }

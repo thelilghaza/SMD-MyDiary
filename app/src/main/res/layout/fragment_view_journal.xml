@@ -128,16 +128,26 @@
                     android:textSize="16sp"
                     android:visibility="gone" />
 
-                <!-- Fixed ImageView to display full image properly -->
-                <ImageView
-                    android:id="@+id/detail_image"
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/detail_image_container"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:adjustViewBounds="true"
-                    android:contentDescription="Journal Image"
-                    android:scaleType="centerInside"
                     android:layout_marginBottom="16dp"
-                    android:visibility="gone" />
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="2dp"
+                    app:cardBackgroundColor="#A5AFC1"
+                    android:minHeight="200dp"
+                    android:visibility="gone">
+
+                    <ImageView
+                        android:id="@+id/detail_image"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:scaleType="centerInside"
+                        android:contentDescription="Journal Image"
+                        android:visibility="visible"
+                        android:padding="8dp"/>
+                </androidx.cardview.widget.CardView>
 
                 <View
                     android:layout_width="match_parent"
